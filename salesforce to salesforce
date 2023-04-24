@@ -1,0 +1,43 @@
+public static List<wrapperClass> getTheData(String recordId){
+        String jsonData;
+        List<productWrapper> prdWrapper;
+        String endPointCall = 'Callout: salesforce org';
+        try{
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint(endPointCall + EncodingUtil.urlEncode('select Id,Field1, Field2 From Object Where field234 = \''+recordId+'\'', 'UTF-8'));
+            req.setMethod('GET');
+            
+            // Use the Http class to send the request and get the response
+            Http http = new Http();
+            HTTPResponse res = http.send(req);
+            if(res.getStatusCode() == 200){
+                Map<String, Object> resMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody()); 
+                if(Integer.valueOf(resMap.get('resultSize')) > 0){
+                    List<Object> jsonList = (List<Object>) JSON.deserializeUntyped(JSON.serialize(resMap.get('recordList')));
+                    wrapper = new List<wrapper>();
+                    productWrapper pr;
+                    Map<String, wrapper> wrapperList = new map<String, wrapper>();
+                    for (Object obj : jsonList) {
+                        Map<String, Object> jsonMap = (Map<String, Object>) obj;
+                        if(wrapperList.keySet().contains((String) jsonMap.get('Field3'))){
+                           pr = new wrapper();
+                           pr = wrapperList.get((String) jsonMap.get('Field3'));
+                           pr.activeCount =  pr.activeCount + Integer.valueOf(jsonMap.get('Field2'));
+                        }else{
+                        pr = new wrapper();
+                        pr.prName = (String) jsonMap.get('Field1');
+                        pr.activeCount = Integer.valueOf(jsonMap.get('Field2'));
+                        pr.inactiveCount = 0;
+                        wrapperList.put((String) jsonMap.get('field3'), pr);
+                        }
+                        
+                    }                
+                }
+            }
+            
+        }catch(Exception ex){
+            System.debug('Exception -->' + ex.getMessage());
+            jsonData = ex.getMessage();
+        }
+        return wrapper;
+    }
