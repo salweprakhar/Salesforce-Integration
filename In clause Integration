@@ -1,0 +1,32 @@
+ public static Boolean getTheProductFromAccount(String recordId, List<String> listofString){
+        Boolean jsonData;
+        String endPointCall = EndPointURL__c.getValues('V8_AssetFetch').URL__c;
+        String query = 'select Id,Field1, Field2, Field3 Where Field1234 = \''+recordId+'\' AND Field1 IN (';
+        for (Integer i = 0; i < productCode.size(); i++) {
+  			if (i == listofString.size() - 1) {
+    		query += '\'' + listofString[i] + '\'';
+ 			 } else {
+    		query += '\'' + listofString[i] + '\',';
+  			}
+			}
+			query += ')';
+        try{
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint(endPointCall + EncodingUtil.urlEncode(query , 'UTF-8'));
+            req.setMethod('GET');
+            
+            // Use the Http class to send the request and get the response
+            Http http = new Http();
+            HTTPResponse res = http.send(req);
+            if(res.getStatusCode() == 200){
+                Map<String, Object> resMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody()); 
+                System.debug('abc' + resMap);
+            }
+            
+        }catch(Exception ex){
+            System.debug('Exception -->' + ex.getMessage());
+            //jsonData = ex.getMessage();
+            jsonData  = false;
+        }
+        return jsonData;
+    }
